@@ -1,0 +1,71 @@
+QUICK REFERENCE CARD
+====================
+
+SETUP ThingSpeak (First Time Only)
+-----------------------------------
+1. Create account: https://thingspeak.com/
+2. New Channel → 4 fields (moisture, pH, temp, humidity)
+3. Copy: Channel ID, Write Key, Read Key
+4. Edit .env file with your keys
+5. Set ENABLE_DEMO_MODE=false
+
+TEST Without Hardware
+---------------------
+python send_test_data.py
+python test_thingspeak.py
+streamlit run app.py
+
+UPLOAD ESP32 Firmware
+---------------------
+1. Open: firmware/esp32_agrisense/esp32_agrisense.ino
+2. Copy config.example.h → config.h
+3. Edit config.h (WiFi + API key)
+4. For testing: #define TEST_MODE true
+5. Upload to ESP32
+6. Open Serial Monitor (115200 baud)
+
+RUN Application
+---------------
+streamlit run app.py
+
+VERIFY Everything Works
+------------------------
+✓ ThingSpeak channel shows data
+✓ Serial Monitor shows "✓ Upload successful"
+✓ Streamlit shows "LIVE IOT MODE"
+✓ Dashboard displays real readings
+
+IMPORTANT FILES
+---------------
+.env                        → Your API keys (NEVER commit!)
+test_thingspeak.py         → Test connection
+send_test_data.py          → Send test data
+firmware/.../config.h      → ESP32 WiFi + API key
+
+HELP FILES
+----------
+THINGSPEAK_SETUP.txt       → ThingSpeak step-by-step
+ESP32_SETUP.txt            → ESP32 hardware + firmware
+COMPLETE_WORKFLOW.txt      → Full system setup
+
+COMMON ISSUES
+-------------
+"No data" → Check ENABLE_DEMO_MODE=false in .env
+"Cannot connect" → Check Channel ID and Read API Key
+"ESP32 error" → Check WiFi credentials and Write API Key
+"NumPy error" → Run: pip install --upgrade "numpy>=2.0.0"
+
+SENSOR PINS (ESP32)
+-------------------
+GPIO 4  → DHT22 Data
+GPIO 34 → Soil Moisture
+GPIO 35 → Soil pH (with voltage divider!)
+
+DATA FLOW
+---------
+Sensors → ESP32 → WiFi → ThingSpeak → Streamlit → Dashboard
+           (60s)         (Cloud)        (API)     (Charts)
+
+SUPPORT
+-------
+Read: COMPLETE_WORKFLOW.txt for full guide

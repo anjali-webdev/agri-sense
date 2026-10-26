@@ -1,0 +1,36 @@
+              precision    recall  f1-score   support
+
+       Apple       1.00      0.96      0.98        24
+      Banana       0.60      0.64      0.62        45
+      Barley       0.92      0.96      0.94        23
+     Cabbage       1.00      0.96      0.98        24
+    Chickpea       0.80      0.89      0.84        44
+     Coconut       0.78      0.73      0.75        44
+      Coffee       0.76      0.82      0.79        45
+      Cotton       0.81      0.64      0.72        45
+      Grapes       1.00      0.95      0.98        22
+   Groundnut       0.84      0.91      0.88        23
+        Jute       0.68      0.58      0.62        43
+      Lentil       0.86      0.71      0.78        45
+       Maize       0.68      0.76      0.72        45
+       Mango       0.78      0.74      0.76        42
+     Mustard       0.96      1.00      0.98        24
+       Onion       1.00      1.00      1.00        25
+      Orange       0.84      0.84      0.84        25
+      Papaya       0.74      0.64      0.68        44
+ PearlMillet       1.00      1.00      1.00        24
+   Pigeonpea       0.96      0.96      0.96        24
+ Pomegranate       1.00      1.00      1.00        22
+      Potato       0.84      0.91      0.87        45
+        Rice       0.72      0.93      0.81        42
+     Soybean       0.78      0.96      0.86        26
+   Sugarcane       0.86      0.86      0.86        43
+   Sunflower       0.95      0.95      0.95        22
+         Tea       0.87      0.76      0.81        45
+      Tomato       0.84      0.91      0.88        23
+  Watermelon       1.00      0.96      0.98        26
+       Wheat       0.95      0.93      0.94        45
+
+    accuracy                           0.83      1019
+   macro avg       0.86      0.86      0.86      1019
+weighted avg       0.84      0.83      0.83      1019

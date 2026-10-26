@@ -1,0 +1,17 @@
+AGRISENSE AI - QUICK START
+==========================
+
+1. Install Dependencies:
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+
+2. Train Model:
+   python scripts\train_model.py
+
+3. Run Application:
+   streamlit run app.py
+
+The app will open at http://localhost:8501
+
+Default mode: DEMO MODE (no hardware needed)

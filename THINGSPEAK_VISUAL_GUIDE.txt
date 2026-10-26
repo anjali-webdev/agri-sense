@@ -1,0 +1,171 @@
+THINGSPEAK SETUP - VISUAL STEP-BY-STEP GUIDE
+=============================================
+
+STEP 1: Create Account
+-----------------------
+1. Go to: https://thingspeak.com/
+2. Click "Sign Up" button (top right)
+3. Fill in:
+   - Email: your email
+   - Password: create strong password
+   - Confirm password
+4. Check "I agree to terms"
+5. Click "Create Account"
+6. Check your email for verification link
+7. Click verification link
+8. Sign in to ThingSpeak
+
+STEP 2: Go to Channels
+-----------------------
+1. After sign in, click "Channels" in top menu
+2. Click "My Channels"
+3. Click "New Channel" button (green button)
+
+STEP 3: Fill Channel Form
+--------------------------
+You will see a form. Fill ONLY these fields:
+
+┌─────────────────────────────────────────┐
+│ Name                                    │
+│ [AgriSense AI Sensor Data            ] │ ← Type this
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ Description                             │
+│ [Real-time IoT sensor monitoring...   ] │ ← Type description
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ Field 1                                 │
+│ [Soil Moisture                        ] │ ← Type this
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ Field 2                                 │
+│ [Soil pH                              ] │ ← Type this
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ Field 3                                 │
+│ [Temperature                          ] │ ← Type this
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ Field 4                                 │
+│ [Humidity                             ] │ ← Type this
+└─────────────────────────────────────────┘
+
+Fields 5, 6, 7, 8: LEAVE EMPTY
+
+All other fields (Tags, Location, Video): SKIP/IGNORE
+
+SCROLL DOWN and click:
+┌──────────────────┐
+│  Save Channel    │ ← Click this
+└──────────────────┘
+
+STEP 4: Get Your Channel ID
+----------------------------
+After saving, you'll see your channel page.
+
+At the top, you'll see:
+┌─────────────────────────────────────────┐
+│ Channel Stats                           │
+│ Channel ID: 2785401     ← COPY THIS!   │
+│ Author: YourName                        │
+│ Access: Private                         │
+└─────────────────────────────────────────┘
+
+WRITE DOWN YOUR CHANNEL ID: _______________
+
+STEP 5: Get API Keys
+--------------------
+1. Click "API Keys" tab (near top of page)
+2. You will see:
+
+┌─────────────────────────────────────────┐
+│ Write API Key                           │
+│ ABCD1234EFGH5678  [Copy]  ← Click Copy │
+└─────────────────────────────────────────┘
+WRITE DOWN WRITE KEY: _______________
+
+Scroll down:
+
+┌─────────────────────────────────────────┐
+│ Read API Keys                           │
+│ XYZ9876QWER5432   [Copy]  ← Click Copy │
+└─────────────────────────────────────────┘
+WRITE DOWN READ KEY: _______________
+
+STEP 6: Configure Your Application
+-----------------------------------
+1. Open your project folder
+2. Find file: .env.example
+3. Make a copy named: .env
+4. Open .env in Notepad
+5. Edit these lines:
+
+THINGSPEAK_CHANNEL_ID=2785401              ← Your Channel ID
+THINGSPEAK_READ_API_KEY=XYZ9876QWER5432   ← Your Read Key
+THINGSPEAK_WRITE_API_KEY=ABCD1234EFGH5678 ← Your Write Key
+ENABLE_DEMO_MODE=false                      ← Change to false
+
+6. Save and close
+
+STEP 7: Verify Setup
+--------------------
+Open Command Prompt in project folder:
+
+python test_thingspeak.py
+
+You should see:
+✓ Channel ID: 2785401
+✓ Read API Key: SET
+✓ Can reach ThingSpeak servers
+✓ Service initialized
+✓ Successfully connected to ThingSpeak
+⚠ NO DATA (this is OK - no data sent yet)
+
+DONE! Your ThingSpeak channel is ready! ✓
+
+NEXT STEPS:
+-----------
+Option 1 - Test with Python (no hardware):
+    python send_test_data.py
+    Wait 2 minutes
+    Refresh ThingSpeak channel page
+    You should see data in charts!
+
+Option 2 - Upload ESP32 firmware:
+    See: ESP32_SETUP.txt
+
+Then run:
+    streamlit run app.py
+
+TROUBLESHOOTING
+---------------
+"Channel ID not found":
+→ Make sure you copied CHANNEL ID (numbers only)
+→ Check .env file has correct ID
+
+"API Key invalid":
+→ Copy keys again from ThingSpeak
+→ Make sure no extra spaces in .env file
+→ Keys are case-sensitive!
+
+"Permission denied":
+→ Channel might be private
+→ Read API Key is required for private channels
+→ Check you copied Read API Key correctly
+
+VISUAL CHECKLIST
+----------------
+✓ Account created and verified
+✓ Channel created with 4 fields
+✓ Channel ID copied
+✓ Write API Key copied
+✓ Read API Key copied
+✓ .env file updated
+✓ test_thingspeak.py runs successfully
+
+YOU'RE DONE! 🎉

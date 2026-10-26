@@ -1,0 +1,197 @@
+ESP32 FIRMWARE SETUP GUIDE
+==========================
+
+Prerequisites
+-------------
+1. Arduino IDE (Download from: https://www.arduino.cc/en/software)
+2. ESP32 board
+3. USB cable
+4. Sensors (soil moisture, pH, DHT22)
+
+Step 1: Install Arduino IDE
+----------------------------
+1. Download Arduino IDE
+2. Install and open Arduino IDE
+
+Step 2: Add ESP32 Board Support
+--------------------------------
+1. Open Arduino IDE
+2. Go to: File > Preferences
+3. In "Additional Board Manager URLs", add:
+   https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+4. Click OK
+5. Go to: Tools > Board > Boards Manager
+6. Search for "esp32"
+7. Install "esp32 by Espressif Systems"
+8. Wait for installation to complete
+
+Step 3: Install Required Libraries
+-----------------------------------
+1. Go to: Sketch > Include Library > Manage Libraries
+2. Install these libraries:
+   
+   a) DHT sensor library
+      - Search: "DHT sensor library"
+      - Install: "DHT sensor library by Adafruit"
+      - Also install dependency: "Adafruit Unified Sensor"
+   
+   b) WiFi (built-in with ESP32)
+   c) HTTPClient (built-in with ESP32)
+
+Step 4: Hardware Connections
+-----------------------------
+Connect sensors to ESP32:
+
+DHT22 (Temperature/Humidity):
+- VCC  -> 3.3V
+- GND  -> GND
+- DATA -> GPIO 4
+
+Soil Moisture Sensor:
+- VCC  -> 3.3V
+- GND  -> GND
+- AOUT -> GPIO 34 (ADC1_CH6)
+
+Soil pH Sensor:
+⚠️ IMPORTANT: pH sensors output 0-5V, ESP32 ADC max is 3.3V
+Solution: Use voltage divider or pH sensor module with 3.3V output
+- VCC  -> 3.3V (if available) or 5V through voltage divider
+- GND  -> GND
+- AOUT -> GPIO 35 (ADC1_CH7) with voltage divider if needed
+
+Voltage Divider for 5V pH sensor (if needed):
+- 5V output from pH sensor
+- Resistor 1: 10kΩ from sensor to ESP32 GPIO 35
+- Resistor 2: 20kΩ from GPIO 35 to GND
+- This divides 5V to ~3.3V safe for ESP32
+
+Step 5: Configure Firmware
+---------------------------
+1. Open: firmware/esp32_agrisense/esp32_agrisense.ino
+2. Copy config.example.h to config.h:
+   - Right-click config.example.h
+   - Copy
+   - Paste in same folder
+   - Rename to: config.h
+3. Edit config.h:
+
+#define WIFI_SSID "Your_WiFi_Name"
+#define WIFI_PASSWORD "Your_WiFi_Password"
+#define THINGSPEAK_WRITE_API_KEY "YOUR_WRITE_KEY_FROM_THINGSPEAK"
+
+Save the file.
+
+Step 6: Calibrate Sensors (IMPORTANT!)
+---------------------------------------
+Soil Moisture Calibration:
+1. Upload firmware with default values
+2. Open Serial Monitor (Tools > Serial Monitor, 115200 baud)
+3. Place sensor in completely DRY soil
+4. Note the raw ADC value (e.g., 3500)
+5. Update in firmware: #define MOISTURE_MIN 3500
+6. Place sensor in completely WET soil (saturated)
+7. Note the raw ADC value (e.g., 1200)
+8. Update in firmware: #define MOISTURE_MAX 1200
+9. Re-upload firmware
+
+pH Sensor Calibration:
+1. Get pH calibration solutions (pH 4.0 and pH 7.0)
+2. Place sensor in pH 7.0 solution
+3. Note voltage reading (e.g., 2.5V)
+4. Update: #define PH_VOLTAGE_7 2.5
+5. Place sensor in pH 4.0 solution
+6. Note voltage reading (e.g., 3.0V)
+7. Update: #define PH_VOLTAGE_4 3.0
+8. Re-upload firmware
+
+Step 7: Upload Firmware
+------------------------
+1. Connect ESP32 to computer via USB
+2. In Arduino IDE:
+   - Tools > Board > ESP32 Arduino > Select your board (e.g., "ESP32 Dev Module")
+   - Tools > Port > Select COM port (e.g., COM3, COM4)
+   - Tools > Upload Speed > 115200
+3. Click Upload button (→)
+4. Wait for "Done uploading" message
+5. Open Serial Monitor (Tools > Serial Monitor)
+6. Set baud rate to 115200
+7. Press ESP32 reset button
+
+Step 8: Verify Operation
+-------------------------
+Serial Monitor should show:
+✓ DHT22 sensor initialized
+✓ Analog pins configured
+✓ Connected to Wi-Fi
+✓ IP Address: 192.168.x.x
+--- Sensor Readings ---
+  Temperature:    25.3 °C
+  Humidity:       65.2 %
+  Soil Moisture:  45.8 %
+  Soil pH:        6.52
+Uploading to ThingSpeak... ✓ Upload successful
+
+Step 9: Verify Data on ThingSpeak
+----------------------------------
+1. Go to your ThingSpeak channel
+2. Click on "Private View" or "Public View"
+3. You should see data appearing in charts
+4. Field 1: Soil Moisture
+5. Field 2: Soil pH
+6. Field 3: Temperature
+7. Field 4: Humidity
+
+Data updates every 60 seconds by default.
+
+Step 10: Run Streamlit Application
+-----------------------------------
+1. Make sure .env is configured (Step 4 above)
+2. Run: streamlit run app.py
+3. Application should show "LIVE IOT MODE"
+4. Dashboard will display real sensor data from ThingSpeak
+
+Troubleshooting
+---------------
+ESP32 won't connect to WiFi:
+- Check SSID and password in config.h
+- Make sure WiFi is 2.4GHz (ESP32 doesn't support 5GHz)
+- Check WiFi signal strength
+
+Upload fails:
+- Check correct COM port selected
+- Try pressing BOOT button on ESP32 during upload
+- Check USB cable (use data cable, not charge-only)
+
+No data on ThingSpeak:
+- Check Write API Key is correct
+- Check internet connection
+- Look for errors in Serial Monitor
+- Check ThingSpeak rate limits (15 seconds minimum between updates)
+
+Sensor readings are wrong:
+- Check sensor connections
+- Verify voltage levels (3.3V for ESP32 ADC)
+- Calibrate sensors properly
+- Check sensor datasheet for specifications
+
+pH sensor not working:
+- pH sensors need proper signal conditioning
+- Consider using pH sensor module with built-in conditioning
+- Verify voltage divider calculations
+- Some pH sensors require separate power supply
+
+DHT22 errors:
+- Check connection to GPIO 4
+- Ensure 10kΩ pull-up resistor between DATA and VCC (some modules have built-in)
+- Try another DHT22 sensor
+
+Alternative: Test Without Real Sensors
+---------------------------------------
+You can modify firmware to send test data:
+1. Comment out sensor reading code
+2. Use fixed values:
+   temperature = 25.0;
+   humidity = 65.0;
+   soilMoisture = 50.0;
+   soilPH = 6.5;
+3. Upload and test ThingSpeak communication

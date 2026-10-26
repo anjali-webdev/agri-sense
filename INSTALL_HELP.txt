@@ -1,0 +1,28 @@
+INSTALLATION TROUBLESHOOTING
+============================
+
+If you got a timeout error during pip install, try these solutions:
+
+OPTION 1 - Retry with longer timeout:
+    install_retry.bat
+
+OPTION 2 - Install packages one by one:
+    install_one_by_one.bat
+
+OPTION 3 - Use latest versions (simpler):
+    install_minimal.bat
+
+OPTION 4 - Manual installation:
+    .venv\Scripts\activate
+    pip install --timeout 120 streamlit pandas numpy scikit-learn joblib plotly requests python-dotenv
+    python scripts\train_model.py
+    streamlit run app.py
+
+OPTION 5 - Use conda (if you have Anaconda):
+    conda activate
+    conda install streamlit pandas numpy scikit-learn joblib plotly requests python-dotenv -c conda-forge
+    python scripts\train_model.py
+    streamlit run app.py
+
+After successful installation:
+    streamlit run app.py

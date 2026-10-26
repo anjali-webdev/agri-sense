@@ -1,0 +1,13 @@
+QUICK FIX FOR NUMPY ERROR
+=========================
+
+The error: "pyarrow requires NumPy 2.0 or newer, found 1.26.3"
+
+SOLUTION - Run this command:
+    pip install --upgrade "numpy>=2.0.0"
+
+Then run:
+    streamlit run app.py
+
+OR use the batch file:
+    fix_numpy.bat

@@ -1,0 +1,28 @@
+              precision    recall  f1-score   support
+
+      Banana       0.58      0.36      0.44        50
+   Blackgram       0.37      0.70      0.48        50
+    Chickpea       0.34      0.38      0.36        50
+     Coconut       0.38      0.24      0.29        50
+      Coffee       0.31      0.34      0.32        50
+      Cotton       0.58      0.56      0.57        50
+      Grapes       0.25      0.08      0.12        50
+        Jute       0.35      0.68      0.47        50
+      Lentil       0.42      0.28      0.34        50
+       Maize       0.57      0.64      0.60        50
+       Mango       0.23      0.12      0.16        50
+    Mungbean       0.49      0.36      0.41        50
+   Muskmelon       0.22      0.12      0.16        50
+      Orange       0.25      0.22      0.23        50
+      Papaya       0.16      0.24      0.19        50
+ Pomegranate       0.51      0.40      0.45        50
+      Potato       0.48      0.64      0.55        50
+        Rice       0.37      0.58      0.45        50
+   Sugarcane       0.94      0.96      0.95        50
+         Tea       0.59      0.46      0.52        50
+  Watermelon       0.69      0.22      0.33        50
+       Wheat       0.54      0.88      0.67        50
+
+    accuracy                           0.43      1100
+   macro avg       0.44      0.43      0.41      1100
+weighted avg       0.44      0.43      0.41      1100

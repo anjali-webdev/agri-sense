@@ -1,0 +1,73 @@
+YOUR THINGSPEAK API KEYS
+========================
+
+Write API Key (for ESP32 to send data):
+XXEPHX4HWZZN8IBV
+
+Read API Key (for Streamlit to read data):
+SH5CQT9IZ4ILD23P
+
+Channel ID:
+[GO TO YOUR THINGSPEAK CHANNEL PAGE AND FIND THE CHANNEL ID NUMBER]
+[It's displayed at the top: "Channel ID: XXXXXX"]
+
+NEXT STEPS - CHOOSE ONE:
+=========================
+
+OPTION 1 - Automatic Configuration (EASIEST)
+--------------------------------------------
+Run this:
+    setup_thingspeak.bat
+
+It will ask for your Channel ID and create .env file automatically.
+
+
+OPTION 2 - Manual Configuration
+--------------------------------
+1. Copy .env.example to .env
+2. Open .env in Notepad
+3. Replace these lines:
+
+   THINGSPEAK_CHANNEL_ID=YOUR_CHANNEL_ID_HERE
+   THINGSPEAK_READ_API_KEY=SH5CQT9IZ4ILD23P
+   THINGSPEAK_WRITE_API_KEY=XXEPHX4HWZZN8IBV
+   ENABLE_DEMO_MODE=false
+
+4. Save and close
+
+
+OPTION 3 - Use Python Script
+-----------------------------
+Run:
+    python configure_env.py
+
+Enter your Channel ID when asked.
+
+
+AFTER CONFIGURATION
+===================
+Test connection:
+    python test_thingspeak.py
+
+Send test data:
+    python send_test_data.py
+
+Run application:
+    streamlit run app.py
+
+
+FOR ESP32 FIRMWARE
+==================
+Edit: firmware/esp32_agrisense/config.h
+
+#define WIFI_SSID "Your_WiFi_Name"
+#define WIFI_PASSWORD "Your_WiFi_Password"
+#define THINGSPEAK_WRITE_API_KEY "XXEPHX4HWZZN8IBV"
+
+
+IMPORTANT: KEEP THESE KEYS PRIVATE!
+====================================
+- Never share on GitHub
+- Never post in public forums
+- Never include in screenshots
+- .env file is in .gitignore (won't be committed)

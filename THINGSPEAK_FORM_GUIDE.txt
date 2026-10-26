@@ -1,0 +1,111 @@
+THINGSPEAK CHANNEL FORM - STEP BY STEP
+=======================================
+
+Fill out the form EXACTLY like this:
+
+BASIC INFORMATION
+-----------------
+Name: 
+    AgriSense AI Sensor Data
+
+Description:
+    Real-time IoT sensor monitoring for smart agriculture. 
+    Tracks soil moisture, pH, temperature, and humidity.
+
+FIELD CONFIGURATION (MOST IMPORTANT!)
+--------------------------------------
+Field 1:
+    Soil Moisture
+
+Field 2:
+    Soil pH
+
+Field 3:
+    Temperature
+
+Field 4:
+    Humidity
+
+Field 5:
+    (Leave EMPTY)
+
+Field 6:
+    (Leave EMPTY)
+
+Field 7:
+    (Leave EMPTY)
+
+Field 8:
+    (Leave EMPTY)
+
+METADATA (Optional - can fill later)
+------------------------------------
+Tags:
+    agriculture, IoT, sensors, soil, ESP32, smart farming
+
+Link to External Site:
+    (Leave empty or add your project website)
+
+Link to GitHub:
+    (Leave empty or add: https://github.com/yourusername/agrisense)
+
+LOCATION (Optional - can skip)
+------------------------------
+Elevation:
+    (Leave empty unless you know exact elevation)
+
+Show Channel Location:
+    ☐ (Unchecked - leave unchecked for privacy)
+
+Latitude:
+    0.0 (Leave as default if not showing location)
+
+Longitude:
+    0.0 (Leave as default if not showing location)
+
+VIDEO (Optional - skip)
+-----------------------
+Show Video:
+    ☐ (Unchecked - no video needed)
+
+YouTube / Vimeo:
+    (Leave empty)
+
+Video URL:
+    (Leave empty)
+
+STATUS (Optional - skip)
+------------------------
+Show Status:
+    ☐ (Unchecked - not needed)
+
+FINAL STEP
+----------
+Click: "Save Channel" button at the bottom
+
+AFTER SAVING
+------------
+You will be redirected to your channel page.
+Look for these important items:
+
+1. Channel ID (top of page): 
+   Example: 2785401
+   → Copy this number
+
+2. Click "API Keys" tab:
+   → Write API Key: Copy this (for ESP32)
+   → Read API Keys: Copy this (for Streamlit)
+
+3. Your channel URL will be:
+   https://thingspeak.com/channels/YOUR_CHANNEL_ID
+
+SUMMARY - ONLY 4 THINGS ARE REQUIRED:
+======================================
+✓ Name: AgriSense AI Sensor Data
+✓ Field 1: Soil Moisture
+✓ Field 2: Soil pH
+✓ Field 3: Temperature
+✓ Field 4: Humidity
+✓ Click: Save Channel
+
+Everything else is OPTIONAL!

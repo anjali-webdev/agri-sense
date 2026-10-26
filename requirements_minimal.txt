@@ -1,0 +1,9 @@
+# Minimal requirements for quick testing
+streamlit
+pandas
+numpy
+scikit-learn
+joblib
+plotly
+requests
+python-dotenv

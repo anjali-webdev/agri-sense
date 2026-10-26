@@ -1,0 +1,62 @@
+{
+  "algorithm": "Random Forest",
+  "training_date": "2026-10-24T14:46:00.731429",
+  "dataset_source": "Synthetic baseline dataset for demonstration",
+  "n_samples": 5091,
+  "n_train": 4072,
+  "n_test": 1019,
+  "n_classes": 30,
+  "feature_names": [
+    "soil_moisture",
+    "soil_ph",
+    "temperature",
+    "humidity"
+  ],
+  "class_names": [
+    "Apple",
+    "Banana",
+    "Barley",
+    "Cabbage",
+    "Chickpea",
+    "Coconut",
+    "Coffee",
+    "Cotton",
+    "Grapes",
+    "Groundnut",
+    "Jute",
+    "Lentil",
+    "Maize",
+    "Mango",
+    "Mustard",
+    "Onion",
+    "Orange",
+    "Papaya",
+    "PearlMillet",
+    "Pigeonpea",
+    "Pomegranate",
+    "Potato",
+    "Rice",
+    "Soybean",
+    "Sugarcane",
+    "Sunflower",
+    "Tea",
+    "Tomato",
+    "Watermelon",
+    "Wheat"
+  ],
+  "test_accuracy": 0.8341511285574092,
+  "macro_f1": 0.8590944797438104,
+  "weighted_f1": 0.832876612135096,
+  "all_models": {
+    "Random Forest": {
+      "accuracy": 0.8341511285574092,
+      "macro_f1": 0.8590944797438104,
+      "weighted_f1": 0.832876612135096
+    },
+    "Decision Tree": {
+      "accuracy": 0.8105986261040236,
+      "macro_f1": 0.8394119913262869,
+      "weighted_f1": 0.8109035107298601
+    }
+  }
+}
