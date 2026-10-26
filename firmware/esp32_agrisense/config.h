@@ -1,21 +1,28 @@
 /*
  * AgriSense AI - Configuration File
  * 
- * CONFIGURED WITH YOUR THINGSPEAK CREDENTIALS
+ * INSTRUCTIONS:
+ * 1. Enter your WiFi network name and password
+ * 2. ThingSpeak credentials are already configured
+ * 3. Save this file
+ * 4. Upload to ESP32
  */
 
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// Wi-Fi Configuration
-// IMPORTANT: Change these to your WiFi credentials
-#define WIFI_SSID "YOUR_WIFI_SSID"
+// ========== WiFi Configuration ==========
+// ⚠️ CHANGE THESE TO YOUR WiFi CREDENTIALS ⚠️
+#define WIFI_SSID "YOUR_WIFI_NETWORK_NAME"
 #define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
 
-// ThingSpeak Configuration
+// ========== ThingSpeak Configuration ==========
+// Already configured for your channel
+#define THINGSPEAK_CHANNEL_ID "3549032"
 #define THINGSPEAK_WRITE_API_KEY "XXEPHX4HWZZN8IBV"
 
-// Device Configuration (optional)
-#define DEVICE_ID "ESP32_AGRISENSE_01"
+// ========== Device Configuration ==========
+#define DEVICE_NAME "AgriSense_ESP32"
+#define FIRMWARE_VERSION "1.0.0"
 
 #endif

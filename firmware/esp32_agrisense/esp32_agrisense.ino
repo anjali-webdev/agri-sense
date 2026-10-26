@@ -1,242 +1,283 @@
 /*
- * AgriSense AI - ESP32 Firmware
- * Smart Agriculture IoT Sensor Node
+ * AgriSense AI - ESP32 IoT Sensor Node
  * 
  * Reads soil moisture, pH, temperature, and humidity sensors
- * Uploads data to ThingSpeak IoT platform via Wi-Fi
+ * Sends data to ThingSpeak cloud platform every 60 seconds
+ * 
+ * Hardware:
+ * - ESP32 DevKit
+ * - DHT11 Temperature & Humidity Sensor (GPIO 4)
+ * - Soil Moisture Sensor (GPIO 34)
+ * - pH Sensor EBC201-C with probe (GPIO 35)
+ * 
+ * Created for AgriSense AI Crop Recommendation System
  */
 
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include "DHT.h"
+#include <DHT.h>
 #include "config.h"
 
-// DHT Sensor Configuration
-#define DHTPIN 4          // DHT22 data pin
-#define DHTTYPE DHT22     // DHT22 sensor type
-DHT dht(DHTPIN, DHTTYPE);
+// ---------- PIN CONFIGURATION ----------
+#define DHT_PIN 4
+#define DHT_TYPE DHT11
+#define SOIL_PIN 34
+#define PH_PIN 35
 
-// Sensor Pin Configuration
-#define SOIL_MOISTURE_PIN 34  // Analog pin for soil moisture
-#define SOIL_PH_PIN 35        // Analog pin for soil pH (requires signal conditioning)
+DHT dht(DHT_PIN, DHT_TYPE);
 
-// Calibration values for soil moisture
-#define MOISTURE_MIN 0        // ADC value for completely dry soil
-#define MOISTURE_MAX 4095     // ADC value for completely wet soil
+// ---------- TIMING CONFIGURATION ----------
+unsigned long lastUpdate = 0;
+const unsigned long UPDATE_INTERVAL = 60000; // Send data every 60 seconds
 
-// Calibration values for pH sensor (adjust based on your sensor)
-#define PH_VOLTAGE_7 2.5      // Voltage at pH 7
-#define PH_VOLTAGE_4 3.0      // Voltage at pH 4
+// ---------- SOIL MOISTURE CALIBRATION ----------
+// Adjust these values after testing your sensor in dry and wet soil
+const int SOIL_DRY = 4095;  // ADC reading in completely dry soil
+const int SOIL_WET = 1500;  // ADC reading in saturated soil
 
-// ThingSpeak Configuration
-const char* server = "api.thingspeak.com";
-const int uploadInterval = 60000;  // Upload every 60 seconds (minimum 15 seconds)
+// ---------- pH SENSOR CALIBRATION ----------
+// For EBC201-C pH sensor
+const float PH_VOLTAGE_AT_PH7 = 2.50;  // Voltage at pH 7.0 (calibrate with buffer)
+const float PH_SLOPE = 0.18;           // Volts per pH unit (calibrate with buffers)
 
-// Enable test mode (no real sensors needed)
-#define TEST_MODE false  // Set to true to send test data without sensors
-
-// Variables
-unsigned long lastUploadTime = 0;
-float temperature = 0;
-float humidity = 0;
-float soilMoisture = 0;
-float soilPH = 0;
+// ---------- SYSTEM STATUS ----------
+int readingCount = 0;
+bool wifiConnected = false;
 
 void setup() {
-  // Initialize Serial Monitor
-  Serial.begin(115200);
+  Serial.begin(9600);
   delay(1000);
   
-  Serial.println("\n===========================================");
-  Serial.println("  AgriSense AI - ESP32 Sensor Node");
-  Serial.println("===========================================\n");
+  // Configure ADC
+  analogReadResolution(12);  // 12-bit resolution (0-4095)
+  analogSetPinAttenuation(SOIL_PIN, ADC_11db);  // Full 0-3.3V range
+  analogSetPinAttenuation(PH_PIN, ADC_11db);
   
   // Initialize DHT sensor
   dht.begin();
-  Serial.println("✓ DHT22 sensor initialized");
   
-  // Initialize analog pins
-  pinMode(SOIL_MOISTURE_PIN, INPUT);
-  pinMode(SOIL_PH_PIN, INPUT);
-  Serial.println("✓ Analog pins configured");
+  // Display startup banner
+  Serial.println();
+  Serial.println("====================================");
+  Serial.println("   AGRISENSE AI - ESP32 IoT NODE");
+  Serial.println("====================================");
+  Serial.println("Hardware: DHT11 + Soil + pH Sensor");
+  Serial.println("Platform: ThingSpeak IoT Cloud");
+  Serial.println("====================================");
+  Serial.println();
   
-  // Connect to Wi-Fi
+  // Connect to WiFi
   connectWiFi();
   
-  Serial.println("\n✓ Setup complete!");
-  Serial.println("Starting sensor readings...\n");
+  Serial.println();
+  Serial.println("System Ready!");
+  Serial.println("Sending data every 60 seconds...");
+  Serial.println("====================================");
+  
+  delay(2000);
 }
 
 void loop() {
-  // Check Wi-Fi connection
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("⚠ Wi-Fi disconnected. Reconnecting...");
+  unsigned long currentTime = millis();
+  
+  // Send data at regular intervals
+  if (currentTime - lastUpdate >= UPDATE_INTERVAL) {
+    readAndSendData();
+    lastUpdate = currentTime;
+  }
+  
+  // Check WiFi connection periodically
+  if (WiFi.status() != WL_CONNECTED && wifiConnected) {
+    Serial.println("\n[WARNING] WiFi disconnected! Reconnecting...");
+    wifiConnected = false;
     connectWiFi();
   }
   
-  // Check if it's time to upload
-  unsigned long currentTime = millis();
-  
-  if (currentTime - lastUploadTime >= uploadInterval) {
-    // Read all sensors
-    readSensors();
-    
-    // Display readings
-    displayReadings();
-    
-    // Upload to ThingSpeak
-    uploadToThingSpeak();
-    
-    lastUploadTime = currentTime;
-  }
-  
-  delay(1000);  // Small delay between loops
+  delay(100);
 }
 
 void connectWiFi() {
-  Serial.print("Connecting to Wi-Fi: ");
+  Serial.println();
+  Serial.println("Connecting to WiFi...");
+  Serial.print("SSID: ");
   Serial.println(WIFI_SSID);
   
+  WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   
   int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
+  while (WiFi.status() != WL_CONNECTED && attempts < 30) {
     delay(500);
     Serial.print(".");
     attempts++;
   }
   
+  Serial.println();
+  
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("\n✓ Connected to Wi-Fi");
-    Serial.print("  IP Address: ");
+    wifiConnected = true;
+    Serial.println("✓ WiFi Connected Successfully!");
+    Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
+    Serial.print("Signal Strength: ");
+    Serial.print(WiFi.RSSI());
+    Serial.println(" dBm");
   } else {
-    Serial.println("\n✗ Failed to connect to Wi-Fi");
-    Serial.println("  Check SSID and password in config.h");
+    wifiConnected = false;
+    Serial.println("✗ WiFi Connection Failed!");
+    Serial.println("Check your SSID and password in config.h");
   }
 }
 
-void readSensors() {
-  #if TEST_MODE
-  // Test mode - generate random but realistic sensor data
-  temperature = 20.0 + (float)(random(0, 100)) / 10.0;  // 20-30°C
-  humidity = 50.0 + (float)(random(0, 300)) / 10.0;     // 50-80%
-  soilMoisture = 30.0 + (float)(random(0, 400)) / 10.0; // 30-70%
-  soilPH = 6.0 + (float)(random(0, 20)) / 10.0;         // 6.0-8.0
-  Serial.println("⚠ TEST MODE: Using simulated sensor data");
-  return;
-  #endif
+void readAndSendData() {
+  readingCount++;
   
-  // Read DHT22 sensor
-  humidity = dht.readHumidity();
-  temperature = dht.readTemperature();
+  Serial.println();
+  Serial.println("========================================");
+  Serial.print("READING #");
+  Serial.println(readingCount);
+  Serial.println("========================================");
   
-  // Check if DHT reading failed
-  if (isnan(humidity) || isnan(temperature)) {
-    Serial.println("⚠ Failed to read from DHT sensor!");
-    humidity = 0;
-    temperature = 0;
+  // ---------- READ DHT11 SENSOR ----------
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+  
+  Serial.println();
+  Serial.println("[DHT11 - Temperature & Humidity]");
+  if (isnan(temperature) || isnan(humidity)) {
+    Serial.println("✗ DHT11 read failed - check wiring!");
+    Serial.println("  Temperature: ERROR");
+    Serial.println("  Humidity: ERROR");
+  } else {
+    Serial.print("  Temperature: ");
+    Serial.print(temperature, 1);
+    Serial.println(" °C");
+    Serial.print("  Humidity: ");
+    Serial.print(humidity, 1);
+    Serial.println(" %");
   }
   
-  // Read soil moisture sensor
-  int moistureRaw = analogRead(SOIL_MOISTURE_PIN);
-  soilMoisture = map(moistureRaw, MOISTURE_MIN, MOISTURE_MAX, 0, 100);
+  // ---------- READ SOIL MOISTURE SENSOR ----------
+  long soilTotal = 0;
+  for (int i = 0; i < 10; i++) {
+    soilTotal += analogRead(SOIL_PIN);
+    delay(10);
+  }
+  int soilRaw = soilTotal / 10;
+  
+  // Map to percentage (0-100%)
+  int soilMoisture = map(soilRaw, SOIL_DRY, SOIL_WET, 0, 100);
   soilMoisture = constrain(soilMoisture, 0, 100);
   
-  // Read soil pH sensor (requires proper signal conditioning and calibration)
-  int phRaw = analogRead(SOIL_PH_PIN);
-  float phVoltage = (phRaw / 4095.0) * 3.3;  // Convert ADC to voltage
-  soilPH = calculatePH(phVoltage);
-  soilPH = constrain(soilPH, 0, 14);
-}
-
-float calculatePH(float voltage) {
-  // Linear pH calculation (adjust based on your sensor calibration)
-  // This is a simplified calculation - proper pH sensors require multi-point calibration
-  float slope = (7.0 - 4.0) / (PH_VOLTAGE_7 - PH_VOLTAGE_4);
-  float ph = 7.0 - slope * (voltage - PH_VOLTAGE_7);
-  return ph;
-}
-
-void displayReadings() {
-  Serial.println("--- Sensor Readings ---");
-  Serial.print("  Temperature:    ");
-  Serial.print(temperature, 1);
-  Serial.println(" °C");
-  
-  Serial.print("  Humidity:       ");
-  Serial.print(humidity, 1);
-  Serial.println(" %");
-  
-  Serial.print("  Soil Moisture:  ");
-  Serial.print(soilMoisture, 1);
-  Serial.println(" %");
-  
-  Serial.print("  Soil pH:        ");
-  Serial.println(soilPH, 2);
   Serial.println();
-}
-
-void uploadToThingSpeak() {
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("✗ Cannot upload - No Wi-Fi connection");
+  Serial.println("[SOIL MOISTURE SENSOR]");
+  Serial.print("  Raw ADC: ");
+  Serial.println(soilRaw);
+  
+  if (soilRaw >= 4090 || soilRaw <= 5) {
+    Serial.println("  ⚠ Warning: Sensor may be disconnected!");
+  }
+  
+  Serial.print("  Soil Moisture: ");
+  Serial.print(soilMoisture);
+  Serial.println(" %");
+  
+  // ---------- READ pH SENSOR (EBC201-C) ----------
+  long phTotal = 0;
+  for (int i = 0; i < 10; i++) {
+    phTotal += analogRead(PH_PIN);
+    delay(10);
+  }
+  int phRaw = phTotal / 10;
+  
+  // Calculate voltage and pH
+  float gpioVoltage = analogReadMilliVolts(PH_PIN) / 1000.0;
+  float boardVoltage = gpioVoltage * 2.0;  // Voltage divider compensation
+  float pH = 7.0 + (PH_VOLTAGE_AT_PH7 - boardVoltage) / PH_SLOPE;
+  pH = constrain(pH, 0.0, 14.0);
+  
+  Serial.println();
+  Serial.println("[pH SENSOR - EBC201-C]");
+  Serial.print("  Raw ADC: ");
+  Serial.println(phRaw);
+  Serial.print("  GPIO Voltage: ");
+  Serial.print(gpioVoltage, 3);
+  Serial.println(" V");
+  Serial.print("  Board Voltage: ");
+  Serial.print(boardVoltage, 3);
+  Serial.println(" V");
+  Serial.print("  Soil pH: ");
+  Serial.println(pH, 2);
+  
+  Serial.println();
+  Serial.println("========================================");
+  
+  // ---------- VALIDATE READINGS ----------
+  if (isnan(temperature) || isnan(humidity)) {
+    Serial.println("✗ Cannot send - DHT11 reading failed!");
+    Serial.println("========================================");
     return;
   }
   
-  // Validate readings before uploading
-  if (!validateReadings()) {
-    Serial.println("⚠ Skipping upload - Invalid sensor readings");
-    return;
+  // ---------- SEND TO THINGSPEAK ----------
+  if (WiFi.status() == WL_CONNECTED) {
+    sendToThingSpeak(soilMoisture, pH, temperature, humidity);
+  } else {
+    Serial.println("✗ Cannot send - WiFi not connected!");
+    Serial.println("========================================");
   }
+}
+
+void sendToThingSpeak(float moisture, float pH, float temp, float humidity) {
+  Serial.println();
+  Serial.println("Uploading to ThingSpeak IoT Cloud...");
   
   HTTPClient http;
   
-  // Build ThingSpeak URL
-  String url = "http://";
-  url += server;
-  url += "/update?api_key=";
-  url += THINGSPEAK_WRITE_API_KEY;
-  url += "&field1=";
-  url += String(soilMoisture, 1);
-  url += "&field2=";
-  url += String(soilPH, 2);
-  url += "&field3=";
-  url += String(temperature, 1);
-  url += "&field4=";
-  url += String(humidity, 1);
+  // Build ThingSpeak update URL
+  String url = String("http://api.thingspeak.com/update?api_key=") + 
+               THINGSPEAK_WRITE_API_KEY +
+               "&field1=" + String(moisture, 1) +
+               "&field2=" + String(pH, 2) +
+               "&field3=" + String(temp, 1) +
+               "&field4=" + String(humidity, 1);
   
-  Serial.print("Uploading to ThingSpeak... ");
+  Serial.println("  Field 1 (Soil Moisture): " + String(moisture, 1) + " %");
+  Serial.println("  Field 2 (Soil pH): " + String(pH, 2));
+  Serial.println("  Field 3 (Temperature): " + String(temp, 1) + " °C");
+  Serial.println("  Field 4 (Humidity): " + String(humidity, 1) + " %");
   
   http.begin(url);
+  http.setTimeout(10000);  // 10 second timeout
+  
   int httpCode = http.GET();
   
   if (httpCode > 0) {
-    String payload = http.getString();
-    if (httpCode == 200 && payload.toInt() > 0) {
-      Serial.println("✓ Upload successful");
+    String response = http.getString();
+    int entryId = response.toInt();
+    
+    if (entryId > 0) {
+      Serial.println();
+      Serial.println("✓ SUCCESS! Data uploaded to ThingSpeak");
+      Serial.print("  Entry ID: ");
+      Serial.println(entryId);
+      Serial.print("  Channel: ");
+      Serial.println(THINGSPEAK_CHANNEL_ID);
     } else {
-      Serial.print("⚠ Upload failed. HTTP code: ");
-      Serial.println(httpCode);
+      Serial.println();
+      Serial.println("✗ FAILED! ThingSpeak returned error");
+      Serial.println("  Possible causes:");
+      Serial.println("  - Rate limit (wait 15-20 seconds between updates)");
+      Serial.println("  - Invalid Write API Key");
+      Serial.println("  - Channel not found");
     }
   } else {
-    Serial.print("✗ Upload error: ");
-    Serial.println(http.errorToString(httpCode).c_str());
+    Serial.println();
+    Serial.println("✗ HTTP Request Failed!");
+    Serial.print("  Error code: ");
+    Serial.println(httpCode);
   }
   
   http.end();
-}
-
-bool validateReadings() {
-  // Check for NaN values
-  if (isnan(temperature) || isnan(humidity) || isnan(soilMoisture) || isnan(soilPH)) {
-    return false;
-  }
-  
-  // Check physical ranges
-  if (temperature < -40 || temperature > 85) return false;
-  if (humidity < 0 || humidity > 100) return false;
-  if (soilMoisture < 0 || soilMoisture > 100) return false;
-  if (soilPH < 0 || soilPH > 14) return false;
-  
-  return true;
+  Serial.println("========================================");
 }
