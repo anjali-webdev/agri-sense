@@ -231,7 +231,10 @@ class ThingSpeakService:
             return None
         
         # Filter to requested time range
-        cutoff = datetime.now() - timedelta(days=days)
+        # Make cutoff timezone-aware (IST) to match timestamps in dataframe
+        import pytz
+        ist = pytz.timezone('Asia/Kolkata')
+        cutoff = datetime.now(ist) - timedelta(days=days)
         df = df[df["timestamp"] >= cutoff].copy()
         
         return df

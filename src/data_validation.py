@@ -209,8 +209,10 @@ def get_demo_data(num_records: int = 100) -> pd.DataFrame:
     """
     np.random.seed(42)
     
-    # Generate timestamps for the last 24 hours
-    now = datetime.now()
+    # Generate timestamps for the last 24 hours in IST
+    import pytz
+    ist = pytz.timezone('Asia/Kolkata')
+    now = datetime.now(ist)
     timestamps = [now - timedelta(hours=24 - i * 24 / num_records) for i in range(num_records)]
     
     # Generate realistic sensor patterns
