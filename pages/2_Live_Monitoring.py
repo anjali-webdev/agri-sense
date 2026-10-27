@@ -13,6 +13,15 @@ from src.config import SENSOR_RANGES
 
 st.set_page_config(page_title="Live Monitoring - AgriSense AI", page_icon="📡", layout="wide")
 
+# Auto-refresh every 30 seconds
+st.markdown("""
+    <script>
+        setTimeout(function() {
+            window.location.reload();
+        }, 30000);
+    </script>
+""", unsafe_allow_html=True)
+
 def main():
     st.title("📡 Live Sensor Monitoring")
     st.markdown("Real-time monitoring of individual sensors with historical trends")

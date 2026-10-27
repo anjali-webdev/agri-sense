@@ -15,6 +15,18 @@ from datetime import datetime
 
 st.set_page_config(page_title="Dashboard - AgriSense AI", page_icon="📊", layout="wide")
 
+# Auto-refresh every 30 seconds
+import time
+st_autorefresh = st.empty()
+with st_autorefresh:
+    st.markdown("""
+        <script>
+            setTimeout(function() {
+                window.location.reload();
+            }, 30000);
+        </script>
+    """, unsafe_allow_html=True)
+
 # Custom CSS
 st.markdown("""
 <style>
@@ -86,7 +98,8 @@ def main():
     
     with col3:
         if timestamp:
-            st.metric("Last Update", timestamp.strftime("%H:%M:%S"))
+            # Display in local timezone with date and time
+            st.metric("Last Update", timestamp.strftime("%d %b, %I:%M:%S %p"))
         else:
             st.metric("Last Update", "N/A")
     
@@ -223,7 +236,10 @@ def main():
         st.rerun()
     
     # Footer
-    st.markdown(f"<div style='text-align: center; color: #999; padding: 1rem;'>Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</div>", unsafe_allow_html=True)
+    import pytz
+    ist = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist)
+    st.markdown(f"<div style='text-align: center; color: #999; padding: 1rem;'>Last refreshed: {current_time.strftime('%d %b %Y, %I:%M:%S %p IST')}</div>", unsafe_allow_html=True)
 
 
 if __name__ == "__main__":

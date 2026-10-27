@@ -122,21 +122,21 @@ class SensorValidator:
         if timestamp is None:
             return False, "No timestamp available"
         
-        # Ensure both datetimes are timezone-aware or both naive
-        now = datetime.now()
-        if hasattr(timestamp, 'tzinfo') and timestamp.tzinfo is not None:
-            # timestamp is timezone-aware, make now aware too
-            from datetime import timezone
-            now = datetime.now(timezone.utc)
-            # If timestamp has a different timezone, convert it to UTC
-            if timestamp.tzinfo != timezone.utc:
-                timestamp = timestamp.astimezone(timezone.utc)
-        else:
-            # timestamp is naive, make sure now is also naive
-            now = datetime.now()
-            # If timestamp is actually a pandas Timestamp, convert to naive datetime
-            if hasattr(timestamp, 'tz_localize'):
-                timestamp = timestamp.tz_localize(None)
+        # Get current time in IST (Asia/Kolkata timezone)
+        from datetime import timezone
+        import pytz
+        
+        ist = pytz.timezone('Asia/Kolkata')
+        now = datetime.now(ist)
+        
+        # Ensure timestamp is timezone-aware
+        if hasattr(timestamp, 'tzinfo'):
+            if timestamp.tzinfo is None:
+                # If naive, assume UTC and convert to IST
+                timestamp = pytz.utc.localize(timestamp).astimezone(ist)
+            else:
+                # Convert to IST if different timezone
+                timestamp = timestamp.astimezone(ist)
         
         age = now - timestamp
         

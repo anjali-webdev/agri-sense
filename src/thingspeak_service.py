@@ -151,11 +151,17 @@ class ThingSpeakService:
         records = []
         for feed in feeds:
             try:
-                # Parse timestamp and convert to timezone-naive UTC
+                # Parse timestamp from ThingSpeak (UTC)
                 ts = pd.to_datetime(feed.get("created_at"))
-                if hasattr(ts, 'tz_localize') and ts.tzinfo is not None:
-                    # Convert to UTC and remove timezone info for consistency
-                    ts = ts.tz_convert('UTC').tz_localize(None)
+                
+                # Convert UTC to local timezone (IST = UTC+5:30)
+                if hasattr(ts, 'tz_localize'):
+                    if ts.tzinfo is None:
+                        # If naive, assume UTC
+                        ts = ts.tz_localize('UTC')
+                    # Convert to IST (Indian Standard Time)
+                    ts = ts.tz_convert('Asia/Kolkata')
+                    # Keep as timezone-aware for accurate display
                 
                 record = {
                     "timestamp": ts,
