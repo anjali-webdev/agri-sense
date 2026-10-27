@@ -125,15 +125,31 @@ class AlertService:
             Alert dictionary if data is stale
         """
         if last_update is None:
+            import pytz
+            ist = pytz.timezone('Asia/Kolkata')
             return {
                 "has_alert": True,
                 "severity": "critical",
                 "sensor": "system",
                 "message": "No data received - timestamp unavailable",
-                "timestamp": datetime.now()
+                "timestamp": datetime.now(ist)
             }
         
-        age_minutes = (datetime.now() - last_update).total_seconds() / 60
+        # Make sure both datetimes are timezone-aware for comparison
+        import pytz
+        ist = pytz.timezone('Asia/Kolkata')
+        now = datetime.now(ist)
+        
+        # Convert last_update to IST if it has timezone info
+        if hasattr(last_update, 'tzinfo'):
+            if last_update.tzinfo is None:
+                # Naive datetime, assume UTC and convert to IST
+                last_update = pytz.utc.localize(last_update).astimezone(ist)
+            else:
+                # Has timezone, convert to IST
+                last_update = last_update.astimezone(ist)
+        
+        age_minutes = (now - last_update).total_seconds() / 60
         
         if age_minutes > max_age_minutes:
             return {
